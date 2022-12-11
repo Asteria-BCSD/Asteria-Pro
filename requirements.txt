@@ -1,0 +1,5 @@
+cptools==2.0.1
+tqdm==4.64.1
+networkx==2.8.8
+numpy==1.23.5
+cxxfilt==0.3.0
