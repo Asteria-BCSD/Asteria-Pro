@@ -2,11 +2,8 @@
 Asteria-Pro is a binary code similarity detection tool, an upgraded version of [Asteria](https://github.com/Asteria-BCSD/Asteria).
 It can perform fast and accurate vulnerability detection task by utilizing an efficient pre-filter and re-ranking mechanism.
 
-<object data="pics/FAsteria_workflow.pdf" type="application/pdf" width="700px" height="700px">
-    <embed src="pics/FAsteria_workflow.pdf">
-        <p>This browser does not support PDFs. Please download the PDF to view it: <a href="pics/FAsteria_workflow.pdf">Asteria-Pro Work Flow.</a>.</p>
-    </embed>
-</object>
+![Overflow](./pics/FAsteria_workflow_page-0001.jpg "Overflow")
+
 
 ## Requirements
 - IDA Pro 7.5+: `Asteria Pro` now maily support linux, but can be easily applied to windows
