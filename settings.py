@@ -7,9 +7,12 @@ import sys
 import torch
 from pathlib import Path
 
-# please input your IDA path
-IDA64_PATH = Path('~/idapro-7.5/idat64')
-IDA_PATH = Path('~/idapro-7.5/idat')
+# replace with your IDA path 
+# IDA64_PATH = Path('~/idapro-7.5/idat64')
+# IDA_PATH = Path('~/idapro-7.5/idat')
+IDA64_PATH = Path('/mnt/d/IDAs/IDA7.5/idapro-7.5/idat64')
+IDA_PATH = Path('/mnt/d/IDAs/IDA7.5/idapro-7.5/idat')
+
 if not IDA_PATH.exists() or not IDA64_PATH.exists():
     raise FileNotFoundError('Can not find ida, please check your ida path')
 

@@ -27,6 +27,7 @@ def gen_cg_ie_table(bin_path):
     if IS_LINUX:
         cmd = f"TVHEADLESS=1 {cmd}"
 
+    print("cmd:" + cmd)
     exe_res = execute_cmd(cmd, timeout=1200)
     exe_res['feat_path'] = str(feat_path)
     return exe_res

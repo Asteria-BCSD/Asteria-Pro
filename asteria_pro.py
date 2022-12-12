@@ -5,12 +5,11 @@
 """
 from pathlib import Path
 from cptools import LogHandler, read_pickle, read_json, write_json, write_pickle
-
 from fg_cg_ie_table import gen_cg_ie_table
 from fg_ast import gen_ast
-from feat_encoding import encode_ast, asteria
 from settings import FILTER_THRESHOLD
 from utils.tool_function import tranverse_call_list, get_lcs_simi, get_match_num
+from feat_encoding import encode_ast, asteria
 
 
 class AsteriaPro(object):
@@ -146,17 +145,26 @@ class AsteriaPro(object):
         }
 
 
-def main():
+def main(args):
     ap = AsteriaPro()
-    res = ap.run(src_func='ASN1_verify',
-                 src_bin_path='sample_bins/vul_bin/openssl-1.0.1j',
-                 tgt_bin_path='sample_bins/target_bin/libcrypto.so.1.0.0')
-    print('-'*10 + 'after filter'+ '-'*10)
+    # res = ap.run(src_func='ASN1_verify',
+    #              src_bin_path='sample_bins/vul_bin/openssl-1.0.1j',
+    #              tgt_bin_path='sample_bins/target_bin/libcrypto.so.1.0.0')
+    res = ap.run(src_func=args.vul_func,
+                 src_bin_path=args.vul_bin,
+                 tgt_bin_path=args.target_bin)
+    print('-'*10 + 'The number of functions after filter'+ '-'*10)
     print(len(res['res_by_filter']))
-    print('-'*10 + 'res by asteria model'+ '-'*10)
+    print('-'*10 + 'Results output by asteria model'+ '-'*10)
     print(res['res_by_model'])
-    print('-' * 10 + 'res by reranking' + '-' * 10)
+    print('-' * 10 + 'Results output by reranking' + '-' * 10)
     print(res['res_by_reranking'])
 
 if __name__ == '__main__':
-    main()
+    import argparse
+    ap = argparse.ArgumentParser(description='Asteria-Pro')
+    ap.add_argument("vul_func", type=str, help = "vulnerable function name")
+    ap.add_argument("vul_bin", type=str, help = "binary contains vulnerable function")
+    ap.add_argument("target_bin", type=str, help = "path to target binary")
+    args = ap.parse_args()
+    main(args)
