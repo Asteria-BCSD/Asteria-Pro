@@ -3,8 +3,9 @@
 """
 
 """
+import numpy as np
 from pathlib import Path
-from cptools import LogHandler, read_pickle, read_json, write_json, write_pickle
+from cptools import LogHandler, read_pickle, read_json, write_json
 from fg_cg_ie_table import gen_cg_ie_table
 from fg_ast import gen_ast
 from settings import FILTER_THRESHOLD
@@ -16,9 +17,23 @@ class AsteriaPro(object):
 
     def __init__(self):
         self.logger = LogHandler('Asteria-Pro')
+        self._data_cache = {}
 
-    @staticmethod
-    def filter(src_func, src_cg_ie_table, tgt_cg_ie_table):
+    def _transform_callee_list(self, src_func, src_cg_ie_table, tgt_cg_ie_table):
+        hash_ = f"{src_func}_{id(src_cg_ie_table)}_{id(tgt_cg_ie_table)}"
+        if hash_ in self._data_cache.keys():
+            return self._data_cache[hash_]
+
+        src_callee_list = tranverse_call_list(call_graph_node=src_cg_ie_table['call_graph'][src_func],
+                                              imports=set([data[0] for data in src_cg_ie_table['imports']]),
+                                              exports=set(src_cg_ie_table['exports']))
+        cg, imports, exports = tgt_cg_ie_table['call_graph'], set(
+            [data[0] for data in tgt_cg_ie_table['imports']]), set(
+            tgt_cg_ie_table['exports'])
+        self._data_cache[hash_] = (src_callee_list, cg, imports, exports)
+        return self._data_cache[hash_]
+
+    def filter(self, src_func, src_cg_ie_table, tgt_cg_ie_table):
         """
         filter out candidate functions with callee similarity
         :param src_func:
@@ -26,12 +41,7 @@ class AsteriaPro(object):
         :param tgt_cg_ie_table:
         :return:
         """
-        src_callee_list = tranverse_call_list(call_graph_node=src_cg_ie_table['call_graph'][src_func],
-                                              imports=set([data[0] for data in src_cg_ie_table['imports']]),
-                                              exports=set(src_cg_ie_table['exports']))
-        cg, imports, exports = tgt_cg_ie_table['call_graph'], set(
-            [data[0] for data in tgt_cg_ie_table['imports']]), set(
-            tgt_cg_ie_table['exports'])
+        src_callee_list, cg, imports, exports = self._transform_callee_list(src_func, src_cg_ie_table, tgt_cg_ie_table)
 
         cand_funcs = []
         for func in cg.nodes:
@@ -40,36 +50,34 @@ class AsteriaPro(object):
                 cand_funcs.append(func)
         return cand_funcs
 
-    @staticmethod
-    def rank_by_model_simi(src_encode_path, tgt_encode_path):
+    def rank_by_model_simi(self, src_encode_path, tgt_encode_path):
         src_func2encode_info = read_pickle(src_encode_path)
         tgt_func2encode_info = read_pickle(tgt_encode_path)
 
-        for func, encod_info in src_func2encode_info.items():
-            src_func = func
-            src_encoding = encod_info['embedding']
-            break
+        src_func = list(src_func2encode_info.keys())[0]
+        src_encoding = src_func2encode_info[src_func]['embedding']
 
         tgt_funcs = []
         tgt_encodings = []
         for func, encode_info in tgt_func2encode_info.items():
             tgt_funcs.append(func)
             tgt_encodings.append(encode_info['embedding'].reshape(-1))
-
+        tgt_encodings = np.array(tgt_encodings)
         simis = asteria.get_simi_by_embedding(src_encoding, tgt_encodings)
         simi_with_func = sorted([(func, simi) for func, simi in zip(tgt_funcs, simis)], key=lambda x: x[1],
-                                reverse=True)[:50]
+                                reverse=True)[:50]  # select top 50 as result
         return simi_with_func
 
-    @staticmethod
-    def rerank(src_func, func_with_simi, src_cg_ie_table, tgt_cg_ie_table):
-        src_callee_list = tranverse_call_list(call_graph_node=src_cg_ie_table['call_graph'][src_func],
-                                              imports=set([data[0] for data in src_cg_ie_table['imports']]),
-                                              exports=set(src_cg_ie_table['exports']))
-
-        cg, imports, exports = tgt_cg_ie_table['call_graph'], set(
-            [data[0] for data in tgt_cg_ie_table['imports']]), set(
-            tgt_cg_ie_table['exports'])
+    def rerank(self, src_func, func_with_simi, src_cg_ie_table, tgt_cg_ie_table):
+        """
+        Rerank results
+        :param src_func:
+        :param func_with_simi:
+        :param src_cg_ie_table:
+        :param tgt_cg_ie_table:
+        :return:
+        """
+        src_callee_list, cg, imports, exports = self._transform_callee_list(src_func, src_cg_ie_table, tgt_cg_ie_table)
 
         rerank_res = []
         for tgt_func, model_simi in func_with_simi:
@@ -139,7 +147,7 @@ class AsteriaPro(object):
                                        src_cg_ie_table=src_cg_ie_table,
                                        tgt_cg_ie_table=tgt_cg_ie_table)
         return {
-            'res_by_filter': read_json(cand_func_path),
+            'res_by_filter': cand_funcs,
             'res_by_model': res_by_model_simi,
             'res_by_reranking': res_by_reranking
         }
@@ -153,18 +161,20 @@ def main(args):
     res = ap.run(src_func=args.vul_func,
                  src_bin_path=args.vul_bin,
                  tgt_bin_path=args.target_bin)
-    print('-'*10 + 'The number of functions after filter'+ '-'*10)
+    print('-' * 10 + 'The number of functions after filter' + '-' * 10)
     print(len(res['res_by_filter']))
-    print('-'*10 + 'Results output by asteria model'+ '-'*10)
+    print('-' * 10 + 'Results output by asteria model' + '-' * 10)
     print(res['res_by_model'])
     print('-' * 10 + 'Results output by reranking' + '-' * 10)
     print(res['res_by_reranking'])
 
+
 if __name__ == '__main__':
     import argparse
+
     ap = argparse.ArgumentParser(description='Asteria-Pro')
-    ap.add_argument("vul_func", type=str, help = "vulnerable function name")
-    ap.add_argument("vul_bin", type=str, help = "binary contains vulnerable function")
-    ap.add_argument("target_bin", type=str, help = "path to target binary")
+    ap.add_argument("-f", "--vul_func", type=str, help="vulnerable function name")
+    ap.add_argument("-v", "--vul_bin", type=str, help="binary contains vulnerable function")
+    ap.add_argument("-t", "--target_bin", type=str, help="path to target binary")
     args = ap.parse_args()
     main(args)

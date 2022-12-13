@@ -13,7 +13,7 @@ DK-based re-ranking module reorders candidate homologous functions in the above 
 lightweight structural features (i.e., function call relationship).
 
 ## Requirements
-- IDA Pro 7.5+: Our IDA Python scripts now maily developed for linux, but can be easily applied to windows
+- IDA Pro 7.5+: Our IDA Python scripts now mainly developed for linux, but can be easily applied to windows
   - Make sure the IDA Python switches to python 3.
   - Extra python packages are required to install to IDA Python: `pip install cptools tqdm networkx==2.1.0 cxxfilt --target="/path/to/IDA Python/DIR/"`
 - conda:  virtual environment build
@@ -32,14 +32,14 @@ conda activate Asteria-pro
 ```shell
 conda install pytorch==1.12.0 torchvision==0.13.0 torchaudio==0.12.0 cudatoolkit=11.3 -c pytorch
 ```
-3. Install other packages 
+> Install pytorch for cpu with `pip install pytorch` if there is no cuda available.
+
+4. Install other packages 
 ```shell
 pip install -r requirements.txt
 ```
 ## Configuration
-Before you start, please take a look at `settings.py` and replace the `IDA_PATH, IDA64_PATH` with your own ida path. 
-
-After that, change the `device`(default `cuda:0`) to `cpu` if there is no cuda available on your computer.
+Before you start, please take a look at `settings.py` and replace the `IDA_PATH, IDA64_PATH` with your own ida path.
 
 ## How to use
 ```
@@ -67,7 +67,7 @@ optional arguments:
 ### Running Example
 
 ```
-python asteria_pro.py ASN1_verify 'sample_bins/vul_bin/openssl-1.0.1j' 'sample_bins/target_bin/libcrypto.so.1.0.0'
+python asteria_pro.py --vul_func ASN1_verify --vul_bin sample_bins/vul_bin/openssl-1.0.1j --target_bin sample_bins/target_bin/libcrypto.so.1.0.0
 ```
 
 * Output
@@ -85,8 +85,6 @@ encoding ast at <cuda:0>: 100%|████████████████�
 2022-12-12 16:03:02,842 asteria_pro.py-line:127 <Asteria-Pro> [INFO] Encoding for sample_bins/target_bin/libcrypto.so.1.0.0
 encoding ast at <cuda:0>: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1030/1030 [02:20<00:00,  7.33it/s]
 2022-12-12 16:05:24,651 asteria_pro.py-line:134 <Asteria-Pro> [INFO] Rank result with model similarity
-/mnt/e/CodeRepository/Asteria-E/Asteria-Pro/utils/similarity.py:106: UserWarning: Creating a tensor from a list of numpy.ndarrays is extremely slow. Please consider converting the list to a single numpy.ndarray with numpy.array() before converting to a tensor. (Triggered internally at  /opt/conda/conda-bld/pytorch_1656352465323/work/torch/csrc/utils/tensor_new.cpp:201.)
-  embedding2 = torch.Tensor(embedding2).to(self.device)
 2022-12-12 16:05:25,020 asteria_pro.py-line:137 <Asteria-Pro> [INFO] Reranking ....
 ----------after filter----------
 1042
