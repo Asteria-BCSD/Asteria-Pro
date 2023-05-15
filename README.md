@@ -97,8 +97,13 @@ encoding ast at <cuda:0>: 100%|████████████████�
 
 # Dataset
 
+## Compiled binaries 
 The massive compiled software binaries can be download from [google drive](https://drive.google.com/file/d/1NZALJqz5W4jowrhXdWWRfuT8fRJfBQ5z/view?usp=sharing).
 
 ![dataset_pic](./pics/dataset_1.bmp)
 
-In each directory, around 200 software are compiled with different compilation settings.
+In each directory, around 200 software are compiled with different compilation settings. 
+
+
+## Vulnerable and patched binaries
+We have released our vulnerability and patch dataset at [zenodo](https://zenodo.org/record/7928860#.ZGGPvkDP0UF)
