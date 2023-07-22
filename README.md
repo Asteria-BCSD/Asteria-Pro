@@ -1,5 +1,14 @@
 # Asteria-Pro
-Asteria-Pro is a binary code similarity detection tool, as an enhancement version of [Asteria](https://github.com/Asteria-BCSD/Asteria).
+This is the official implementation of Asteria-Pro, a binary code similarity detection tool, as an enhancement version of [Asteria](https://github.com/Asteria-BCSD/Asteria), which has been accepted by ACM Transactions on Software Engineering and Methodology ([ToSEM](https://dl.acm.org/doi/10.1145/3604611)). 
+
+```
+@article{Yang2023AsteriaProED,
+  title={Asteria-Pro: Enhancing Deep-Learning Based Binary Code Similarity Detection by Incorporating Domain Knowledge},
+  author={Shouguo Yang and Chaopeng Dong and Yang Xiao and Yiran Cheng and Zhiqiang Shi and Zhi Li and Limin Sun},
+  journal={ACM Transactions on Software Engineering and Methodology},
+  year={2023}
+}
+```
 
 It is designed and optimized for **efficient and accurate vulnerability detection** (a.k.a bug search) task.
 
